@@ -6,6 +6,10 @@ import java.time.LocalTime;
 import java.time.LocalDate;
 import java.io.IOException;
 import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
+
+
 
 public class FinancialTransactionApplication {
     public static void main(String[] args) {
@@ -91,29 +95,76 @@ public class FinancialTransactionApplication {
                     while (menuChoice != 'H') {
 
                         System.out.println("Ledger");
-                    System.out.println("All transactions (A)");
-                    System.out.println("Deposits (D)");
-                    System.out.println("Payments (P)");
-                    System.out.println("Reports (R)");
-                    System.out.println("Home (H)"); }
-                    
-                    menuChoice = scanner.next().charAt(0);}
+                        System.out.println("All transactions (A)");
+                        System.out.println("Deposits (D)");
+                        System.out.println("Payments (P)");
+                        System.out.println("Reports (R)");
+                        System.out.println("Home (H)");
+
+                        menuChoice = scanner.next().charAt(0);
+
+                        switch (menuChoice) {
+
+                            case 'A' -> {
+                                try {
+                                    FileReader allTransactions = new FileReader("transactions.csv");
+                                    BufferedReader transHistory = new BufferedReader(allTransactions);
+                                    String line = transHistory.readLine();
+
+                                    while (line != null) {
+                                        System.out.println(line);
+                                        line = transHistory.readLine();
+                                    }
+
+                                } catch (IOException e) {
+                                    System.out.println("Unable to read transaction.");
+                                }
+                            }
+                                case 'D' -> {
+                                    try {
+                                        FileReader deposits = new FileReader("transactions.csv");
+                                        BufferedReader depHistory = new BufferedReader(deposits);
+                                        String transactions = depHistory.readLine();
+
+                                        while (transactions != null) {
+
+                                            String[] parts = transactions.split("\\|");
+                                            double amount = Double.parseDouble(parts[4]);
+
+                                            if (amount > 0) {
+                                                System.out.println(transactions);
+                                            }
+                                            transactions = depHistory.readLine();
+                                        }
+
+                                    } catch (IOException e) {
+                                        System.out.println("Unable to read transactions");
+                                    }
 
 
-                    case 'X' -> {
-                        System.out.println("Exiting application");
+                                }
+
+
+
+                            case 'X' -> {
+                                System.out.println("Exiting application");
+                            }
+
+
+                            default -> {
+                                System.out.println("Invalid Selection, Please try again.");
+                            }
+
+
+                        }
+
+
                     }
-
-
-                    default -> {
-                        System.out.println("Invalid Selection, Please try again.");
-                    }
-
-
                 }
             }
-
         }
-
     }
+}
+
+
 
