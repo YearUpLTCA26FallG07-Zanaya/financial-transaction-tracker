@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.util.ArrayList;
 
 
 
@@ -15,16 +16,13 @@ public class FinancialTransactionApplication {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
+        Menu menu = new Menu();
+        ArrayList<Transaction> transaction = new ArrayList<>();
         char choice = ' ';
 
         while (choice != 'X') {
 
-            System.out.println("1.Add Deposit: (D)");
-            System.out.println("2.Make Payment: (P)");
-            System.out.println("3.Ledger: (L)");
-            System.out.println("4.Exit: (X)");
-            System.out.println("Please select an option: ");
-
+            menu.displayMainMenu();
             choice = scanner.next().charAt(0);
 
 
@@ -47,11 +45,11 @@ public class FinancialTransactionApplication {
 
                     String formattedTime = time.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
                     String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    String transaction = formattedDate + "|" + formattedTime + "|" + description + "|" + vendor + "|" + deposit;
+                    String transactions = formattedDate + "|" + formattedTime + "|" + description + "|" + vendor + "|" + deposit;
 
                     try
                             (FileWriter writer = new FileWriter("transactions.csv", true)) {
-                        writer.write(transaction + "\n");
+                        writer.write(transactions + "\n");
                     } catch (IOException e) {
                         System.out.println("Error saving transaction ");
                     }
@@ -94,13 +92,7 @@ public class FinancialTransactionApplication {
 
                     while (menuChoice != 'H') {
 
-                        System.out.println("Ledger");
-                        System.out.println("All transactions (A)");
-                        System.out.println("Deposits (D)");
-                        System.out.println("Payments (P)");
-                        System.out.println("Reports (R)");
-                        System.out.println("Home (H)");
-
+                        menu.displayLedgerMenu();
                         menuChoice = scanner.next().charAt(0);
 
                         switch (menuChoice) {
@@ -109,62 +101,235 @@ public class FinancialTransactionApplication {
                                 try {
                                     FileReader allTransactions = new FileReader("transactions.csv");
                                     BufferedReader transHistory = new BufferedReader(allTransactions);
+
+                                    ArrayList<String> allEntries  = new ArrayList<>();
+
                                     String line = transHistory.readLine();
 
                                     while (line != null) {
-                                        System.out.println(line);
+                                        allEntries.add(line);
                                         line = transHistory.readLine();
+                                    }
+                                    transHistory.close();
+
+                                    for (int i = allEntries.size() -1; i >= 0; i--) {
+                                        System.out.println(allEntries.get(i));
+
                                     }
 
                                 } catch (IOException e) {
                                     System.out.println("Unable to read transaction.");
                                 }
                             }
-                                case 'D' -> {
-                                    try {
-                                        FileReader deposits = new FileReader("transactions.csv");
-                                        BufferedReader depHistory = new BufferedReader(deposits);
-                                        String transactions = depHistory.readLine();
+                            case 'D' -> {
+                                try {
+                                    FileReader deposits = new FileReader("transactions.csv");
+                                    BufferedReader depHistory = new BufferedReader(deposits);
 
-                                        while (transactions != null) {
+                                    ArrayList<String> allDeposits = new ArrayList<>();
 
-                                            String[] parts = transactions.split("\\|");
+                                    String transactions = depHistory.readLine();
+
+                                    while (transactions != null) {
+
+                                        String[] parts = transactions.split("\\|");
+
+                                        if (parts.length ==5) {
                                             double amount = Double.parseDouble(parts[4]);
 
                                             if (amount > 0) {
-                                                System.out.println(transactions);
+                                                allDeposits.add(transactions);
                                             }
-                                            transactions = depHistory.readLine();
                                         }
+                                        transactions = depHistory.readLine();
 
-                                    } catch (IOException e) {
-                                        System.out.println("Unable to read transactions");
+                                        for (int i = allDeposits.size() - 1; i >= 0; i--) {
+                                            System.out.println(allDeposits.get(i));
+                                        }
                                     }
 
-
+                                } catch (IOException e) {
+                                    System.out.println("Unable to read transactions");
                                 }
-
-
-
-                            case 'X' -> {
-                                System.out.println("Exiting application");
                             }
 
+                            case 'P' -> {
+                                try {
+                                    FileReader payments = new FileReader("transactions.csv");
+                                    BufferedReader payHistory = new BufferedReader(payments);
 
-                            default -> {
-                                System.out.println("Invalid Selection, Please try again.");
+                                    ArrayList<String> allPayments = new ArrayList<>();
+
+                                    String transactions = payHistory.readLine();
+
+                                    while (transactions != null) {
+                                        String[] parts = transactions.split("\\|");
+
+                                        if (parts.length == 5) {
+                                            double amount = Double.parseDouble(parts[4]);
+
+                                            if (amount < 0) {
+                                                allPayments.add(transactions);
+                                            }
+                                        }
+                                        transactions = payHistory.readLine();
+                                    }
+
+                                        for (int i = allPayments.size() - 1; i >= 0; i--) {
+                                            System.out.println(allPayments.get(i));
+                                        }
+
+                                } catch (IOException exception) {
+                                    System.out.println("Unable to read transaction");
+                                }
                             }
+                            case 'R' -> {
+
+                                try {
+                                    FileReader files = new FileReader("transactions.csv");
+                                    BufferedReader pulledFiles = new BufferedReader(files);
+
+                                    String filesPulled = pulledFiles.readLine();
+
+                                    while (filesPulled != null) {
+
+                                        String[] parts = filesPulled.split("\\|");
+
+                                        if (parts.length == 5) {
+
+                                            Transaction transactions = new Transaction(parts[0], parts[2], parts[1], parts[3], Double.parseDouble(parts[4])
+                                            );
+
+                                            transaction.add(transactions);
+                                        }
+
+                                        filesPulled = pulledFiles.readLine();
+
+                                    }
+
+                                } catch (IOException e) {
+                                    System.out.println("Unable to read transactions");
+                                }
+                                char reportChoice = ' ';
 
 
+                                while (reportChoice != '0') {
+                                    menu.displayReportsMenu();
+                                    reportChoice = scanner.next().charAt(0);
+
+                                    if (reportChoice == '1') {
+
+                                      LocalDate today = LocalDate.now();
+
+                                      for (Transaction item : transaction) {
+
+                                          LocalDate date = LocalDate.parse(item.getDate());
+
+                                          if (date.getMonth() == today.getMonth() && date.getYear() == today.getYear()) {
+                                              System.out.println(item.getDate() + "|" + item.getDescription() + "|" + item.getVendor() + "|" + item.getAmount());
+                                          }
+                                      }
+                                    } else if (reportChoice == '2') {
+
+                                        LocalDate today = LocalDate.now();
+                                        LocalDate previousMonth = today.minusMonths(1);
+
+                                        for (Transaction item : transaction) {
+
+                                            LocalDate date = LocalDate.parse(item.getDate());
+
+                                            if (date.getMonth() == previousMonth.getMonth()
+                                                    && date.getYear() == previousMonth.getYear()) {
+
+                                                System.out.println(item.getDate() + " | "
+                                                        + item.getDescription() + " | "
+                                                        + item.getVendor() + " | "
+                                                        + item.getAmount());
+                                            }
+                                        }
+                                    } else if (reportChoice == '3') {
+                                        LocalDate today = LocalDate.now();
+
+                                        for (Transaction item : transaction) {
+
+                                            LocalDate date = LocalDate.parse(item.getDate());
+
+                                            if (date.getYear() == today.getYear()
+                                                    && !date.isAfter(today)) {
+
+                                                System.out.println(item.getDate() + " | "
+                                                        + item.getDescription() + " | "
+                                                        + item.getVendor() + " | "
+                                                        + item.getAmount());
+                                            }
+                                        }
+                                    } else if (reportChoice == '4') {
+                                        LocalDate today = LocalDate.now();
+
+                                        int previousYear = today.getYear() - 1;
+
+                                        for (Transaction item : transaction) {
+
+                                            LocalDate date = LocalDate.parse(item.getDate());
+
+                                            if (date.getYear() == previousYear) {
+
+                                                System.out.println(item.getDate() + " | "
+
+                                                        + item.getDescription() + " | "
+
+                                                        + item.getVendor() + " | "
+
+                                                        + item.getAmount());
+
+                                            }
+
+                                        }
+                                    } else if (reportChoice == '5') {
+
+                                        scanner.nextLine();
+
+                                        System.out.println("Enter vendor name:");
+                                        String searchVendor = scanner.nextLine();
+
+                                        for (Transaction item : transaction) {
+
+                                            if (item.getVendor().equalsIgnoreCase(searchVendor)) {
+
+                                                System.out.println(item.getDate() + " | "
+                                                        + item.getDescription() + " | "
+                                                        + item.getVendor() + " | "
+                                                        + item.getAmount());
+                                            }
+                                        }
+
+                                    } else if (reportChoice != '0') {
+                                        System.out.println("Invalid selection");
+
+
+                                    }
+                                }
+                            }
                         }
-
-
                     }
                 }
             }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
