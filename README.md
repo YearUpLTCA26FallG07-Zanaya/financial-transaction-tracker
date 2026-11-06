@@ -1,2 +1,4 @@
-# financial-transaction-tracker
-A java based command line transaction tracker that allows users to record deposits, payments, view transaction history and generate financial reports
+Financial Transaction Trackers
+
+A java command-line application that allows users to add deposits, make payments, view transactions, and generate financial reports.
+Transactions are saved in a file called transactions.csv file
